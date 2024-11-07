@@ -24,6 +24,54 @@ export const typeDefs = gql`
     visits: [Visit]
   }
 
+  type Experience {
+    description: String
+    startDate: String
+    endDate: String
+  }
+
+  input UpdateUserInput {
+    role: String
+    firstName: String
+    lastName: String
+    middleName: String
+    bloodGroup: String
+    birthDate: String
+    phone: String
+    gender: String
+    allergies: [String]
+    operations: [OperationInput]
+    medicalCategories: [MedicalCategoryInput]
+    certificates: [String]
+    experience: [ExperienceInput]
+    position: String
+  }
+
+  input OperationInput {
+    date: String
+    description: String
+    photos: [String]
+  }
+
+  input VisitInput {
+    date: String
+    diagnosis: String
+    description: String
+    files: [String]
+  }
+
+  input MedicalCategoryInput {
+    category: String
+    diagnoses: [String]
+    visits: [VisitInput]
+  }
+
+  input ExperienceInput {
+    description: String
+    startDate: String
+    endDate: String
+  }
+
   type User {
     _id: ID!
     email: String!
@@ -39,6 +87,9 @@ export const typeDefs = gql`
     allergies: [String]
     operations: [Operation]
     medicalCategories: [MedicalCategory]
+    certificates: [String]
+    experience: [Experience]
+    position: String
     accessToken: String
     refreshToken: String
   }
@@ -58,5 +109,6 @@ export const typeDefs = gql`
       newPassword: String!
     ): String
     changeEmail(currentEmail: String!, newEmail: String!, code: String!): String
+    updateUser(_id: ID!, input: UpdateUserInput!): User
   }
 `

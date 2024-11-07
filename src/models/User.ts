@@ -27,6 +27,13 @@ interface User extends Document {
       files?: string[]
     }>
   }[]
+  certificates?: string[]
+  experience?: Array<{
+    description: string
+    startDate: string
+    endDate: string
+  }>
+  position?: string
 }
 
 const UserSchema = new Schema({
@@ -61,7 +68,16 @@ const UserSchema = new Schema({
         }
       ]
     }
-  ]
+  ],
+  certificates: [String],
+  experience: [
+    {
+      description: String,
+      startDate: String,
+      endDate: String
+    }
+  ],
+  position: String
 })
 
 export default mongoose.model<User>('User', UserSchema)

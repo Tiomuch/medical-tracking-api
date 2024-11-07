@@ -106,6 +106,69 @@ export const resolvers = {
       await VerificationCode.findOneAndDelete({ email: newEmail })
 
       return 'Email updated successfully'
+    },
+
+    updateUser: async (
+      _: unknown,
+      {
+        _id,
+        input
+      }: {
+        _id: string
+        input: {
+          role?: 'User' | 'Doctor'
+          firstName?: string
+          lastName?: string
+          middleName?: string
+          bloodGroup?: string
+          birthDate?: Date
+          phone?: string
+          gender?: string
+          allergies?: string[]
+          operations?: Array<{
+            date: Date
+            description: string
+            photos?: string[]
+          }>
+          medicalCategories?: {
+            category: string
+            diagnoses: string[]
+            visits: Array<{
+              date: Date
+              diagnosis?: string
+              description: string
+              files?: string[]
+            }>
+          }[]
+          certificates?: string[]
+          experience?: Array<{
+            description: string
+            startDate: string
+            endDate: string
+          }>
+          position?: string
+        }
+      },
+      context: unknown
+    ) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (!context.user) {
+          throw new Error('Not authenticated')
+        }
+
+        const user = await User.findById(_id)
+        if (!user) throw new Error('User not found')
+
+        Object.assign(user, input)
+
+        await user.save()
+
+        return user
+      } catch (error) {
+        throw new Error(`Error updating user ${error}`)
+      }
     }
   }
 }
