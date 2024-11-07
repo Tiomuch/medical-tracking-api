@@ -9,6 +9,47 @@ import {
 } from '../../utils/tokenService'
 
 export const resolvers = {
+  Query: {
+    getUser: async (_: unknown, { _id }: { _id: string }, context: unknown) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (!context.user) {
+          throw new Error('Not authenticated')
+        }
+
+        const user = await User.findById(_id)
+        if (!user) throw new Error('User not found')
+        return user
+      } catch (error) {
+        throw new Error(`Error fetching user: ${error}`)
+      }
+    },
+
+    getUsers: async (
+      _: unknown,
+      { role, position }: { role?: string; position?: string },
+      context: unknown
+    ) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (!context.user) {
+          throw new Error('Not authenticated')
+        }
+
+        const filter: Record<string, unknown> = {}
+        if (role) filter.role = role
+        if (position) filter.position = position
+
+        const users = await User.find(filter)
+        return users
+      } catch (error) {
+        throw new Error(`Error fetching users: ${error}`)
+      }
+    }
+  },
+
   Mutation: {
     sendCode: async (_: unknown, { email }: { email: string }) => {
       const code = Math.floor(100000 + Math.random() * 900000).toString()

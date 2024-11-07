@@ -17,7 +17,7 @@ async function startServer() {
         const user = req?.headers?.authorization ? authMiddleware(req) : null
         return { user }
       } catch (error) {
-        throw new Error(`Context creation failed: ${error}`)
+        throw new Error(`${error}`)
       }
     }
   })

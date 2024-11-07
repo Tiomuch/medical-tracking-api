@@ -111,4 +111,9 @@ export const typeDefs = gql`
     changeEmail(currentEmail: String!, newEmail: String!, code: String!): String
     updateUser(_id: ID!, input: UpdateUserInput!): User
   }
+
+  type Query {
+    getUser(_id: ID!): User
+    getUsers(role: String, position: String): [User]
+  }
 `
