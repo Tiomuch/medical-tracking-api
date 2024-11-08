@@ -7,6 +7,8 @@ import {
   generateRefreshToken,
   verifyToken
 } from '../../utils/tokenService'
+import fs from 'fs'
+import { FileUpload } from 'graphql-upload-ts'
 
 export const resolvers = {
   Query: {
@@ -310,6 +312,43 @@ export const resolvers = {
 
       await patient.save()
       return 'Card shared successfully'
+    },
+
+    uploadFiles: async (
+      _: unknown,
+      { files }: { files: Promise<FileUpload>[] },
+      context: { user: { id: string } }
+    ) => {
+      try {
+        if (!context.user) {
+          throw new Error('Not authenticated')
+        }
+
+        const uploadedPaths: string[] = []
+
+        for (const filePromise of files) {
+          const fileConfig = await filePromise
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const { createReadStream, filename } = fileConfig.file
+
+          const path = `uploads/${Date.now()}-${filename}`
+          const stream = createReadStream()
+
+          await new Promise((resolve, reject) => {
+            const out = fs.createWriteStream(path)
+            stream.pipe(out)
+            out.on('finish', () => resolve(true))
+            out.on('error', (err) => reject(err))
+          })
+
+          uploadedPaths.push(path)
+        }
+
+        return uploadedPaths
+      } catch (error) {
+        throw new Error(`Error uploading files: ${error}`)
+      }
     }
   }
 }

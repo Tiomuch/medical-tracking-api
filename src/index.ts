@@ -1,12 +1,18 @@
 import express from 'express'
+import { graphqlUploadExpress } from 'graphql-upload-ts'
 import { ApolloServer } from 'apollo-server-express'
 import { typeDefs } from './graphql/typeDefs'
 import { resolvers } from './graphql/resolvers'
 import connectDB from './config/db'
 import { authMiddleware } from './auth/authMiddleware'
+import path from 'path'
 
 const app = express()
 const PORT = process.env.PORT || 3000
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
+
+app.use(graphqlUploadExpress())
 
 async function startServer() {
   const server = new ApolloServer({

@@ -95,6 +95,8 @@ export const typeDefs = gql`
     sharedWith: [String]
   }
 
+  scalar Upload
+
   type Mutation {
     sendCode(email: String!): String
     verifyCodeAndRegister(
@@ -112,6 +114,7 @@ export const typeDefs = gql`
     changeEmail(currentEmail: String!, newEmail: String!, code: String!): String
     updateUser(_id: ID!, input: UpdateUserInput!): User
     shareCard(patientId: ID!, doctorId: ID!): String
+    uploadFiles(files: [Upload!]!): [String!]!
   }
 
   type Query {
