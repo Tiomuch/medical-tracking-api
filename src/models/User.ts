@@ -34,6 +34,7 @@ interface User extends Document {
     endDate: string
   }>
   position?: string
+  sharedWith?: string[]
 }
 
 const UserSchema = new Schema({
@@ -48,6 +49,7 @@ const UserSchema = new Schema({
   phone: String,
   gender: String,
   allergies: [String],
+  sharedWith: [String],
   operations: [
     {
       date: Date,

@@ -10,10 +10,12 @@ import {
 
 export const resolvers = {
   Query: {
-    getUser: async (_: unknown, { _id }: { _id: string }, context: unknown) => {
+    getUser: async (
+      _: unknown,
+      { _id }: { _id: string },
+      context: { user: { id: string } }
+    ) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         if (!context.user) {
           throw new Error('Not authenticated')
         }
@@ -28,12 +30,22 @@ export const resolvers = {
 
     getUsers: async (
       _: unknown,
-      { role, position }: { role?: string; position?: string },
-      context: unknown
+      {
+        role,
+        position,
+        search,
+        page = 1,
+        limit = 10
+      }: {
+        role?: string
+        position?: string
+        search?: string
+        page?: number
+        limit?: number
+      },
+      context: { user: { id: string } }
     ) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         if (!context.user) {
           throw new Error('Not authenticated')
         }
@@ -42,11 +54,63 @@ export const resolvers = {
         if (role) filter.role = role
         if (position) filter.position = position
 
-        const users = await User.find(filter)
+        if (search) {
+          filter.$or = [
+            { firstName: { $regex: search, $options: 'i' } },
+            { lastName: { $regex: search, $options: 'i' } },
+            { middleName: { $regex: search, $options: 'i' } }
+          ]
+        }
+
+        const skip = (page - 1) * limit
+
+        const users = await User.find(filter).skip(skip).limit(limit)
+
         return users
       } catch (error) {
         throw new Error(`Error fetching users: ${error}`)
       }
+    },
+
+    getSharedCards: async (
+      _: unknown,
+      {
+        doctorId,
+        search,
+        page = 1,
+        limit = 10
+      }: { doctorId: string; search?: string; page?: number; limit?: number },
+      context: { user: { id: string } }
+    ) => {
+      if (!context.user) {
+        throw new Error('Not authorized')
+      }
+
+      const user = await User.findById(context.user.id)
+
+      if (user?.role !== 'Doctor') {
+        throw new Error('You have to be a doctor')
+      }
+
+      if (context.user.id !== doctorId) {
+        throw new Error('Access denied')
+      }
+
+      const query = { sharedWith: doctorId }
+      if (search) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        query.$or = [
+          { firstName: { $regex: search, $options: 'i' } },
+          { lastName: { $regex: search, $options: 'i' } }
+        ]
+      }
+
+      const patients = await User.find(query)
+        .skip((page - 1) * limit)
+        .limit(limit)
+
+      return patients
     }
   },
 
@@ -190,11 +254,9 @@ export const resolvers = {
           position?: string
         }
       },
-      context: unknown
+      context: { user: { id: string } }
     ) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         if (!context.user) {
           throw new Error('Not authenticated')
         }
@@ -210,6 +272,44 @@ export const resolvers = {
       } catch (error) {
         throw new Error(`Error updating user ${error}`)
       }
+    },
+
+    shareCard: async (
+      _: unknown,
+      { patientId, doctorId }: { patientId: string; doctorId: string },
+      context: { user: { id: string } }
+    ) => {
+      if (!context.user) {
+        throw new Error('Not authenticated')
+      }
+
+      const user = await User.findById(context.user.id)
+
+      if (user?.role !== 'User') {
+        throw new Error('Only patients can share their cards')
+      }
+
+      if (context.user.id !== patientId) {
+        throw new Error('Access denied')
+      }
+
+      const patient = await User.findById(patientId)
+      const doctor = await User.findById(doctorId)
+
+      if (!patient || !doctor || doctor.role !== 'Doctor') {
+        throw new Error('Invalid patient or doctor ID')
+      }
+
+      if (!patient.sharedWith) {
+        patient.sharedWith = []
+      }
+
+      if (!patient.sharedWith.includes(doctorId)) {
+        patient.sharedWith.push(doctorId)
+      }
+
+      await patient.save()
+      return 'Card shared successfully'
     }
   }
 }

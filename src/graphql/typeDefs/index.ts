@@ -92,6 +92,7 @@ export const typeDefs = gql`
     position: String
     accessToken: String
     refreshToken: String
+    sharedWith: [String]
   }
 
   type Mutation {
@@ -110,10 +111,18 @@ export const typeDefs = gql`
     ): String
     changeEmail(currentEmail: String!, newEmail: String!, code: String!): String
     updateUser(_id: ID!, input: UpdateUserInput!): User
+    shareCard(patientId: ID!, doctorId: ID!): String
   }
 
   type Query {
     getUser(_id: ID!): User
-    getUsers(role: String, position: String): [User]
+    getUsers(
+      role: String
+      position: String
+      search: String
+      page: Int
+      limit: Int
+    ): [User]
+    getSharedCards(doctorId: ID!, search: String, page: Int, limit: Int): [User]
   }
 `
