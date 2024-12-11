@@ -228,20 +228,19 @@ export const resolvers = {
           lastName?: string
           middleName?: string
           bloodGroup?: string
-          birthDate?: Date
+          birthDate?: string
           phone?: string
           gender?: string
           allergies?: string[]
           operations?: Array<{
-            date: Date
+            date: string
             description: string
             photos?: string[]
           }>
           medicalCategories?: {
             category: string
-            diagnoses: string[]
             visits: Array<{
-              date: Date
+              date: string
               diagnosis?: string
               description: string
               files?: string[]

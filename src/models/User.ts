@@ -8,25 +8,24 @@ interface User extends Document {
   lastName?: string
   middleName?: string
   bloodGroup?: string
-  birthDate?: Date
+  birthDate?: string
   phone?: string
   gender?: string
   allergies?: string[]
   operations?: Array<{
-    date: Date
+    date: string
     description: string
     photos?: string[]
   }>
-  medicalCategories?: {
+  medicalCategories?: Array<{
     category: string
-    diagnoses: string[]
     visits: Array<{
-      date: Date
+      date: string
       diagnosis?: string
       description: string
       files?: string[]
     }>
-  }[]
+  }>
   certificates?: string[]
   experience?: Array<{
     description: string
@@ -45,14 +44,14 @@ const UserSchema = new Schema({
   lastName: String,
   middleName: String,
   bloodGroup: String,
-  birthDate: Date,
+  birthDate: String,
   phone: String,
   gender: String,
   allergies: [String],
   sharedWith: [String],
   operations: [
     {
-      date: Date,
+      date: String,
       description: String,
       photos: [String]
     }
@@ -60,10 +59,9 @@ const UserSchema = new Schema({
   medicalCategories: [
     {
       category: String,
-      diagnoses: [String],
       visits: [
         {
-          date: Date,
+          date: String,
           diagnosis: String,
           description: String,
           files: [String]

@@ -20,7 +20,6 @@ export const typeDefs = gql`
 
   type MedicalCategory {
     category: String
-    diagnoses: [String]
     visits: [Visit]
   }
 
@@ -62,7 +61,6 @@ export const typeDefs = gql`
 
   input MedicalCategoryInput {
     category: String
-    diagnoses: [String]
     visits: [VisitInput]
   }
 
